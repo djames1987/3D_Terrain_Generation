@@ -1,23 +1,36 @@
-from ursina import *
-from chunk_gen import Chunk
-import util
+#from rust_noise import *
 
-app = Ursina()
+#gen = MapDataGenerator(1024.0, 256)
+#data = gen.generate_map_data()
 
-region_position = (1, 0)
-region_size = (4, 1)
-chunk_size = (64, 64, 256)
-max_depth = 8
+def gen_world(world_chunks=12):
+    world = []
 
-region_min_point, region_max_point, chunk_bounding_boxes = util.calculate_region_and_chunk_bounding_boxes(region_position, region_size, chunk_size)
+    # Calculate the number of chunks in each dimension
+    chunks_per_dimension = int(world_chunks ** 0.5)
 
-# Construct the Octree for the region
-region_octree = util.construct_octree(region_min_point, region_max_point, chunk_bounding_boxes, max_depth)
-print('Octree')
-# Generate chunk for each bounding box in the octree
-chunk = Chunk()
-for box in chunk_bounding_boxes:
-    chunk.gen_chunk(box[0], box[1], region_octree)
+    for y in range(chunks_per_dimension):
+        for x in range(chunks_per_dimension):
+            chunk_name = f"Chunk_{x}_{y}"
 
-EditorCamera()
-app.run()
+            # Check if the desired number of chunks is reached
+            if len(world) >= world_chunks:
+                return world
+
+            world.append(chunk_name)
+
+    return world
+
+
+print(gen_world(12))
+
+
+def get_matrix(self, filename='matrix.npy'):
+    if os.path.exists(f'map_data/{filename}'):
+        print(f'loading: {filename}')
+        return TerrainMatrix.load_matrix(filename=filename)
+    else:
+        print(f'Generating and saving: {filename}')
+        self.generate_map_data()
+        print(f'Loading: {filename}')
+        return TerrainMatrix.load_matrix(filename=filename)
